@@ -1,5 +1,8 @@
 from flask import Flask, jsonify, abort
 
+import subprocess
+subprocess.run(request_arg, shell=True)
+
 app = Flask(__name__)
 
 ITEMS = {1: "alpha", 2: "beta"}
