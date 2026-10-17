@@ -16,6 +16,8 @@ jobs:
       id-token: write
     env:
       IMAGE: ${{ vars.ACR_NAME }}.azurecr.io/cicd-portfolio-app
+    outputs:
+      image_ref: ${{ steps.push.outputs.image_ref }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -42,7 +44,38 @@ jobs:
           subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
 
       - name: Push to ACR
+        id: push
         if: github.ref == 'refs/heads/main'
         run: |
           az acr login --name "${{ vars.ACR_NAME }}"
           docker push "$IMAGE:${{ github.sha }}"
+          REF=$(docker inspect --format='{{index .RepoDigests 0}}' "$IMAGE:${{ github.sha }}")
+          echo "image_ref=$REF" >> "$GITHUB_OUTPUT"
+
+  deploy:
+    needs: image
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - name: Azure login (OIDC)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ vars.AZURE_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Deploy new revision
+        env:
+          IMAGE_REF: ${{ needs.image.outputs.image_ref }}
+        run: |
+          az extension add --name containerapp --upgrade
+          az containerapp update -n ca-cicd-portfolio -g rg-cicd-portfolio --image "$IMAGE_REF"
+
+      - name: Show active revision
+        run: |
+          az containerapp revision list -n ca-cicd-portfolio -g rg-cicd-portfolio \
+            --query "[?properties.active].{name:name,health:properties.healthState,image:properties.template.containers[0].image}" \
+            -o table

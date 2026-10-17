@@ -8,7 +8,7 @@ ITEMS = {1: "alpha", 2: "beta"}
 
 @app.get("/")
 def root():
-    return jsonify(status="ok")
+    return jsonify(status="ok-v2")
 
 
 @app.get("/health")
