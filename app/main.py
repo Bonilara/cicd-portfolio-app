@@ -24,6 +24,7 @@ def get_item(item_id):
         abort(404)
     return jsonify(id=item_id, name=ITEMS[item_id])
 
+_client = None
 
 def _get_secret(name):
     global _client
