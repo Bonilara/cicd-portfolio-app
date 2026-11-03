@@ -1,0 +1,12 @@
+{
+  "version": "1.0",
+  "trustPolicies": [
+    {
+      "name": "cicd-portfolio-images",
+      "registryScopes": [ "acrcicd267741700.azurecr.io/cicd-portfolio-app" ],
+      "signatureVerification": { "level": "strict" },
+      "trustStores": [ "ca:cicd-portfolio" ],
+      "trustedIdentities": [ "x509.subject: CN=cicd-portfolio-signer,O=Portfolio,C=SE" ]
+    }
+  ]
+}

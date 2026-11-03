@@ -51,6 +51,25 @@ jobs:
           docker push "$IMAGE:${{ github.sha }}"
           REF=$(docker inspect --format='{{index .RepoDigests 0}}' "$IMAGE:${{ github.sha }}")
           echo "image_ref=$REF" >> "$GITHUB_OUTPUT"
+      - name: Set up Notation
+        if: github.ref == 'refs/heads/main'
+        uses: notaryproject/notation-action/setup@v1
+        with:
+          version: "1.3.2"
+
+      - name: Sign image digest
+        if: github.ref == 'refs/heads/main'
+        uses: notaryproject/notation-action/sign@v1
+        with:
+          plugin_name: azure-kv
+          plugin_url: https://github.com/Azure/notation-azure-kv/releases/download/v1.2.1/notation-azure-kv_1.2.1_linux_amd64.tar.gz
+          plugin_checksum: 67c5ccaaf28dd44d2b6572684d84e344a02c2258af1d65ead3910b3156d3eaf5
+          key_id: ${{ vars.SIGNING_KEY_ID }}
+          target_artifact_reference: ${{ steps.push.outputs.image_ref }}
+          signature_format: cose
+          plugin_config: |-
+            self_signed=true
+            credential_type=azurecli
 
   deploy:
     needs: image
@@ -60,12 +79,31 @@ jobs:
       contents: read
       id-token: write
     steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
       - name: Azure login (OIDC)
         uses: azure/login@v2
         with:
           client-id: ${{ vars.AZURE_CLIENT_ID }}
           tenant-id: ${{ vars.AZURE_TENANT_ID }}
           subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+      
+      - name: ACR login
+        run: az acr login --name "${{ vars.ACR_NAME }}"
+
+      - name: Set up Notation
+        uses: notaryproject/notation-action/setup@v1
+        with:
+          version: "1.3.2"
+
+      - name: Verify signature (gate)
+        uses: notaryproject/notation-action/verify@v1
+        with:
+          target_artifact_reference: ${{ needs.image.outputs.image_ref }}
+          trust_policy: .github/trustpolicy/trustpolicy.json
+          trust_store: .github/truststore
 
       - name: Deploy new revision
         env:
