@@ -51,7 +51,7 @@ jobs:
           docker push "$IMAGE:${{ github.sha }}"
           REF=$(docker inspect --format='{{index .RepoDigests 0}}' "$IMAGE:${{ github.sha }}")
           echo "image_ref=$REF" >> "$GITHUB_OUTPUT"
-            - name: Set up Notation
+      - name: Set up Notation
         if: github.ref == 'refs/heads/main'
         uses: notaryproject/notation-action/setup@v1
         with:
@@ -104,7 +104,7 @@ jobs:
           target_artifact_reference: ${{ needs.image.outputs.image_ref }}
           trust_policy: .github/trustpolicy/trustpolicy.json
           trust_store: .github/truststore
-          
+
       - name: Deploy new revision
         env:
           IMAGE_REF: ${{ needs.image.outputs.image_ref }}
