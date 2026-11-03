@@ -54,8 +54,6 @@ jobs:
       - name: Set up Notation
         if: github.ref == 'refs/heads/main'
         uses: notaryproject/notation-action/setup@v1
-        with:
-          version: "1.3.2"
 
       - name: Sign image digest
         if: github.ref == 'refs/heads/main'
