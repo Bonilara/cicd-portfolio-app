@@ -69,7 +69,7 @@ jobs:
             self_signed=true
             credential_type=azurecli
 
-  deploy:
+  deploy: #test deployment
     needs: image
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
