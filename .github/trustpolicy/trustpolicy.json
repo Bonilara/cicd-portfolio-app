@@ -6,7 +6,6 @@
       "registryScopes": [ "acrcicd267741700.azurecr.io/cicd-portfolio-app" ],
       "signatureVerification": { "level": "strict" },
       "trustStores": [ "ca:cicd-portfolio" ],
-      "trustedIdentities": [ "x509.subject: CN=cicd-portfolio-signer,O=Portfolio,C=SE" ]
-    }
+      "trustedIdentities": [ "x509.subject: CN=cicd-portfolio-signer,O=Portfolio,L=Stockholm,ST=Stockholm,C=SE" ]    }
   ]
 }
