@@ -15,7 +15,7 @@ def root():
 
 @app.get("/health")
 def health():
-    return jsonify(status="healthy")
+    return jsonify(status="super healthy")
 
 
 @app.get("/items/<int:item_id>")

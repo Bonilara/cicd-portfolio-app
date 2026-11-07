@@ -56,7 +56,7 @@ jobs:
         uses: notaryproject/notation-action/setup@v1
 
       - name: Sign image digest
-        if: github.ref == 'refs/heads/main'
+        if: false
         uses: notaryproject/notation-action/sign@v1
         with:
           plugin_name: azure-kv
